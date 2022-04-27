@@ -38,45 +38,49 @@ __all__ = [
 ]
 
 
-if "PYLINTHOME" in os.environ:
-    PYLINT_HOME = os.environ["PYLINTHOME"]
-else:
-    PYLINT_HOME = DEFAULT_PYLINT_HOME
+def get_pylint_home() -> str:
+    if "PYLINTHOME" in os.environ:
+        return os.environ["PYLINTHOME"]
+    pylint_home = DEFAULT_PYLINT_HOME
     # The spam prevention is due to pylint being used in parallel by
     # pre-commit, and the message being spammy in this context
     # Also if you work with old version of pylint that recreate the
     # old pylint home, you can get the old message for a long time.
     prefix_spam_prevention = "pylint_warned_about_old_cache_already"
     spam_prevention_file = os.path.join(
-        PYLINT_HOME,
+        pylint_home,
         datetime.now().strftime(prefix_spam_prevention + "_%Y-%m-%d.temp"),
     )
     old_home = os.path.join(USER_HOME, OLD_DEFAULT_PYLINT_HOME)
     if os.path.exists(old_home) and not os.path.exists(spam_prevention_file):
         print(
-            f"PYLINTHOME is now '{PYLINT_HOME}' but obsolescent '{old_home}' is found; "
+            f"PYLINTHOME is now '{pylint_home}' but obsolescent '{old_home}' is found; "
             "you can safely remove the latter",
             file=sys.stderr,
         )
         # Remove old spam prevention file
-        if os.path.exists(PYLINT_HOME):
-            for filename in os.listdir(PYLINT_HOME):
+        if os.path.exists(pylint_home):
+            for filename in os.listdir(pylint_home):
                 if prefix_spam_prevention in filename:
                     try:
-                        os.remove(os.path.join(PYLINT_HOME, filename))
+                        os.remove(os.path.join(pylint_home, filename))
                     except OSError:
                         pass
 
         # Create spam prevention file for today
         try:
-            pathlib.Path(PYLINT_HOME).mkdir(parents=True, exist_ok=True)
+            pathlib.Path(pylint_home).mkdir(parents=True, exist_ok=True)
             with open(spam_prevention_file, "w", encoding="utf8") as f:
                 f.write("")
         except Exception as exc:  # pylint: disable=broad-except
             print(
                 "Can't write the file that was supposed to "
-                f"prevent 'pylint.d' deprecation spam in {PYLINT_HOME} because of {exc}."
+                f"prevent 'pylint.d' deprecation spam in {pylint_home} because of {exc}."
             )
+    return pylint_home
+
+
+PYLINT_HOME = get_pylint_home()
 
 
 def _get_pdata_path(base_name: str, recurs: int) -> pathlib.Path:
