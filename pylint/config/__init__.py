@@ -5,10 +5,10 @@
 from __future__ import annotations
 
 import os
-import pathlib
 import pickle
 import sys
 from datetime import datetime
+from pathlib import Path
 
 from pylint.config.arguments_provider import UnsupportedAction
 from pylint.config.configuration_mixin import ConfigurationMixIn
@@ -69,7 +69,7 @@ def get_pylint_home() -> str:
 
         # Create spam prevention file for today
         try:
-            pathlib.Path(pylint_home).mkdir(parents=True, exist_ok=True)
+            Path(pylint_home).mkdir(parents=True, exist_ok=True)
             with open(spam_prevention_file, "w", encoding="utf8") as f:
                 f.write("")
         except Exception as exc:  # pylint: disable=broad-except
@@ -83,13 +83,21 @@ def get_pylint_home() -> str:
 PYLINT_HOME = get_pylint_home()
 
 
-def _get_pdata_path(base_name: str, recurs: int) -> pathlib.Path:
+def _get_pdata_path(
+    base_name: str, recurs: int, pylint_home: str | Path | None = None
+) -> Path:
+    if pylint_home is None:
+        pylint_home = PYLINT_HOME
     base_name = base_name.replace(os.sep, "_")
-    return pathlib.Path(PYLINT_HOME) / f"{base_name}{recurs}.stats"
+    return Path(pylint_home) / f"{base_name}{recurs}.stats"
 
 
-def load_results(base: str) -> LinterStats | None:
-    data_file = _get_pdata_path(base, 1)
+def load_results(
+    base: str, pylint_home: str | Path | None = None
+) -> LinterStats | None:
+    if pylint_home is None:
+        pylint_home = PYLINT_HOME
+    data_file = _get_pdata_path(base, 1, pylint_home)
     try:
         with open(data_file, "rb") as stream:
             data = pickle.load(stream)
@@ -100,12 +108,16 @@ def load_results(base: str) -> LinterStats | None:
         return None
 
 
-def save_results(results: LinterStats, base: str) -> None:
-    if not os.path.exists(PYLINT_HOME):
+def save_results(
+    results: LinterStats, base: str, pylint_home: str | Path | None = None
+) -> None:
+    if pylint_home is None:
+        pylint_home = PYLINT_HOME
+    if not os.path.exists(pylint_home):
         try:
-            os.makedirs(PYLINT_HOME)
+            os.makedirs(pylint_home)
         except OSError:
-            print(f"Unable to create directory {PYLINT_HOME}", file=sys.stderr)
+            print(f"Unable to create directory {pylint_home}", file=sys.stderr)
     data_file = _get_pdata_path(base, 1)
     try:
         with open(data_file, "wb") as stream:
