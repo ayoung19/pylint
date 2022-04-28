@@ -56,7 +56,7 @@ OLD_DEFAULT_PYLINT_HOME = ".pylint.d"
 DEFAULT_PYLINT_HOME = platformdirs.user_cache_dir("pylint")
 
 
-def get_pylint_home() -> str:
+def _get_pylint_home() -> str:
     """Return the pylint home."""
     if "PYLINTHOME" in os.environ:
         return os.environ["PYLINTHOME"]
@@ -98,7 +98,7 @@ def get_pylint_home() -> str:
     return pylint_home
 
 
-PYLINT_HOME = get_pylint_home()
+PYLINT_HOME = _get_pylint_home()
 
 
 class WarningScope:

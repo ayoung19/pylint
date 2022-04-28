@@ -31,7 +31,7 @@ from pylint.constants import (
     MSG_STATE_SCOPE_MODULE,
     OLD_DEFAULT_PYLINT_HOME,
     PYLINT_HOME,
-    get_pylint_home,
+    _get_pylint_home,
 )
 from pylint.exceptions import InvalidMessageError
 from pylint.lint import PyLinter
@@ -647,7 +647,7 @@ def test_pylint_home_from_environ() -> None:
         pylintd = join(tempfile.gettempdir(), OLD_DEFAULT_PYLINT_HOME)
         os.environ["PYLINTHOME"] = pylintd
         try:
-            assert get_pylint_home() == pylintd
+            assert _get_pylint_home() == pylintd
         finally:
             try:
                 rmtree(pylintd)
