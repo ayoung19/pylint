@@ -9,7 +9,6 @@ These are in pylint.config for compatibility reasons.
 
 from __future__ import annotations
 
-import os
 import pickle
 import sys
 import warnings
@@ -20,9 +19,9 @@ from pylint.utils import LinterStats
 
 
 def _get_pdata_path(
-    base_name: str, recurs: int, pylint_home: str | Path = PYLINT_HOME
+    base_name: str | Path, recurs: int, pylint_home: str | Path = PYLINT_HOME
 ) -> Path:
-    base_name = base_name.replace(os.sep, "_")
+    base_name = "_".join(str(p) for p in Path(base_name).parents)
     return Path(pylint_home) / f"{base_name}{recurs}.stats"
 
 
@@ -49,9 +48,10 @@ def load_results(
 def save_results(
     results: LinterStats, base: str, pylint_home: str | Path = PYLINT_HOME
 ) -> None:
-    if not os.path.exists(pylint_home):
+    pylint_home = Path(pylint_home)
+    if not pylint_home.exists():
         try:
-            os.makedirs(pylint_home)
+            pylint_home.mkdir(exist_ok=True)
         except OSError:
             print(f"Unable to create directory {pylint_home}", file=sys.stderr)
     data_file = _get_pdata_path(base, 1)
