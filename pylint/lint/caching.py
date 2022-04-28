@@ -2,11 +2,6 @@
 # For details: https://github.com/PyCQA/pylint/blob/main/LICENSE
 # Copyright (c) https://github.com/PyCQA/pylint/blob/main/CONTRIBUTORS.txt
 
-"""Caching functions.
-
-These are in pylint.config for compatibility reasons.
-"""
-
 from __future__ import annotations
 
 import pickle

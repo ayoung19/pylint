@@ -4,20 +4,6 @@
 
 from __future__ import annotations
 
-from pylint.config.arguments_provider import UnsupportedAction
-from pylint.config.caching import load_results, save_results
-from pylint.config.configuration_mixin import ConfigurationMixIn
-from pylint.config.environment_variable import PYLINTRC
-from pylint.config.find_default_config_files import (
-    find_default_config_files,
-    find_pylintrc,
-)
-from pylint.config.option import Option
-from pylint.config.option_manager_mixin import OptionsManagerMixIn
-from pylint.config.option_parser import OptionParser
-from pylint.config.options_provider_mixin import OptionsProviderMixIn
-from pylint.constants import PYLINT_HOME, USER_HOME
-
 __all__ = [
     "ConfigurationMixIn",  # Deprecated
     "find_default_config_files",
@@ -30,6 +16,53 @@ __all__ = [
     "PYLINTRC",
     "USER_HOME",  # Compatibility with the old API
     "PYLINT_HOME",  # Compatibility with the old API
-    "save_results",  # Compatibility with the old API
-    "load_results",  # Compatibility with the old API
+    "save_results",  # Compatibility with the old API # Deprecated
+    "load_results",  # Compatibility with the old API # Deprecated
 ]
+
+import warnings
+from pathlib import Path
+
+from pylint.config.arguments_provider import UnsupportedAction
+from pylint.config.configuration_mixin import ConfigurationMixIn
+from pylint.config.environment_variable import PYLINTRC
+from pylint.config.find_default_config_files import (
+    find_default_config_files,
+    find_pylintrc,
+)
+from pylint.config.option import Option
+from pylint.config.option_manager_mixin import OptionsManagerMixIn
+from pylint.config.option_parser import OptionParser
+from pylint.config.options_provider_mixin import OptionsProviderMixIn
+from pylint.constants import PYLINT_HOME, USER_HOME
+from pylint.utils import LinterStats
+
+
+def load_results(
+    base: str | Path, pylint_home: str | Path = PYLINT_HOME
+) -> LinterStats | None:
+    # TODO: 3.0: Remove # pylint: disable=fixme
+    # pylint: disable=import-outside-toplevel
+    from pylint.lint.caching import load_results as _real_load_results
+
+    warnings.warn(
+        "'pylint.config.load_results' is deprecated, please use "
+        "'pylint.lint.load_results' instead. This will be removed in 3.0.",
+        DeprecationWarning,
+    )
+    return _real_load_results(base, pylint_home)
+
+
+def save_results(
+    results: LinterStats, base: str | Path, pylint_home: str | Path = PYLINT_HOME
+) -> None:
+    # TODO: 3.0: Remove # pylint: disable=fixme
+    # pylint: disable=import-outside-toplevel
+    from pylint.lint.caching import save_results as _real_save_results
+
+    warnings.warn(
+        "'pylint.config.save_results' is deprecated, please use "
+        "'pylint.lint.save_results' instead. This will be removed in 3.0.",
+        DeprecationWarning,
+    )
+    return _real_save_results(results, base, pylint_home)

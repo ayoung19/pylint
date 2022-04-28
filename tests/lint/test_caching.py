@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from pylint.config.caching import _get_pdata_path, load_results, save_results
 from pylint.constants import PYLINT_HOME
+from pylint.lint.caching import _get_pdata_path, load_results, save_results
 from pylint.utils import LinterStats
 from pylint.utils.linterstats import BadNames
 
@@ -23,12 +23,16 @@ PYLINT_HOME_PATH = Path(PYLINT_HOME)
     ],
 )
 def test__get_pdata_path(path: str, recur: int, expected: Path) -> None:
-    assert _get_pdata_path(path, recur) == expected
+    assert _get_pdata_path(Path(path), recur) == expected
 
 
-@pytest.mark.parametrize("path", ["", "a/path/"])
-def test_save_and_load_result(path: str) -> None:
-    linter_stats = LinterStats(
+# Pytest fixtures works like this by design
+# pylint: disable=redefined-outer-name
+
+
+@pytest.fixture
+def linter_stats() -> LinterStats:
+    return LinterStats(
         bad_names=BadNames(
             argument=1,
             attr=2,
@@ -44,6 +48,10 @@ def test_save_and_load_result(path: str) -> None:
             typevar=12,
         )
     )
+
+
+@pytest.mark.parametrize("path", ["", "a/path/"])
+def test_save_and_load_result(path: str, linter_stats: LinterStats) -> None:
     save_results(linter_stats, path)
     loaded = load_results(path)
     assert loaded is not None
@@ -52,9 +60,22 @@ def test_save_and_load_result(path: str) -> None:
 
 @pytest.mark.parametrize("path", ["", "a/path/"])
 def test_save_and_load_not_a_linter_stats(path: str) -> None:
-    # TODO Remove in 3.0 # pylint: disable=fixme
+    # TODO: 3.0: Remove tests # pylint: disable=fixme
     # type ignore because this is what we're testing
     with pytest.warns(DeprecationWarning):
         save_results(1, path)  # type: ignore[arg-type]
         loaded = load_results(path)
         assert loaded is None
+
+
+def test_load_save_results_deprecation(linter_stats) -> None:
+    """TODO: 3.0: Remove tests and deprecated import # pylint: disable=fixme"""
+    # pylint: disable=redefined-outer-name, import-outside-toplevel, reimported
+    with pytest.warns(DeprecationWarning):
+        from pylint.config import save_results
+
+        save_results(linter_stats, "")
+    with pytest.warns(DeprecationWarning):
+        from pylint.config import load_results
+
+        load_results("", "")
