@@ -19,15 +19,17 @@ from pylint.utils import LinterStats
 
 
 def _get_pdata_path(
-    base_name: str | Path, recurs: int, pylint_home: str | Path = PYLINT_HOME
+    base_name: Path, recurs: int, pylint_home: Path = Path(PYLINT_HOME)
 ) -> Path:
-    base_name = "_".join(str(p) for p in Path(base_name).parents)
-    return Path(pylint_home) / f"{base_name}{recurs}.stats"
+    underscored_name = "_".join(str(p) for p in base_name.parents)
+    return pylint_home / f"{underscored_name}{recurs}.stats"
 
 
 def load_results(
-    base: str, pylint_home: str | Path = PYLINT_HOME
+    base: str | Path, pylint_home: str | Path = PYLINT_HOME
 ) -> LinterStats | None:
+    base = Path(base)
+    pylint_home = Path(pylint_home)
     data_file = _get_pdata_path(base, 1, pylint_home)
     try:
         with open(data_file, "rb") as stream:
@@ -46,8 +48,9 @@ def load_results(
 
 
 def save_results(
-    results: LinterStats, base: str, pylint_home: str | Path = PYLINT_HOME
+    results: LinterStats, base: str | Path, pylint_home: str | Path = PYLINT_HOME
 ) -> None:
+    base = Path(base)
     pylint_home = Path(pylint_home)
     if not pylint_home.exists():
         try:
