@@ -29,14 +29,8 @@ def load_results(
     try:
         with open(data_file, "rb") as stream:
             data = pickle.load(stream)
-            # TODO Remove in 3.0 # pylint: disable=fixme
             if not isinstance(data, LinterStats):
-                warnings.warn(
-                    f"Loaded the wrong type of stats {type(data)}, we need a "
-                    f"LinterStats, this will become an error in 3.0.",
-                    DeprecationWarning,
-                )
-                raise TypeError
+                raise TypeError(f"Expected a 'LinterStats' got {type(data)}")
             return data
     except Exception:  # pylint: disable=broad-except
         return None
