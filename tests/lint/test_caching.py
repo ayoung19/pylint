@@ -60,12 +60,13 @@ def test_save_and_load_result(path: str, linter_stats: LinterStats) -> None:
 
 @pytest.mark.parametrize("path", ["", "a/path/"])
 def test_save_and_load_not_a_linter_stats(path: str) -> None:
-    # TODO: 3.0: Remove tests # pylint: disable=fixme
     # type ignore because this is what we're testing
-    with pytest.warns(DeprecationWarning):
-        save_results(1, path)  # type: ignore[arg-type]
+    save_results(1, path)  # type: ignore[arg-type]
+    with pytest.warns(UserWarning) as warn:
         loaded = load_results(path)
-        assert loaded is None
+    assert loaded is None
+    warn_str = str(warn.pop().message)
+    assert "old pylint cache with invalid data," in warn_str
 
 
 def test_load_save_results_deprecation(linter_stats) -> None:

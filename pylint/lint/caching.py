@@ -30,9 +30,15 @@ def load_results(
         with open(data_file, "rb") as stream:
             data = pickle.load(stream)
             if not isinstance(data, LinterStats):
-                raise TypeError(f"Expected a 'LinterStats' got {type(data)}")
+                warnings.warn(
+                    "You're using an old pylint cache with invalid data following "
+                    f"an upgrade, please delete '{data_file}'.",
+                    UserWarning,
+                )
+                return None
             return data
     except Exception:  # pylint: disable=broad-except
+        # There's probably an issue with the cache but we don't know how to fix it
         return None
 
 
@@ -47,13 +53,6 @@ def save_results(
         except OSError:
             print(f"Unable to create directory {pylint_home}", file=sys.stderr)
     data_file = _get_pdata_path(base, 1)
-    # TODO Remove in 3.0 # pylint: disable=fixme
-    if not isinstance(results, LinterStats):
-        warnings.warn(
-            f"Loaded the wrong type of stats {type(results)}, we need a "
-            f"LinterStats, this will become an error in 3.0.",
-            DeprecationWarning,
-        )
     try:
         with open(data_file, "wb") as stream:
             pickle.dump(results, stream)
