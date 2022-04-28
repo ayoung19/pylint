@@ -21,7 +21,6 @@ __all__ = [
 ]
 
 import warnings
-from pathlib import Path
 
 from pylint.config.arguments_provider import UnsupportedAction
 from pylint.config.configuration_mixin import ConfigurationMixIn
@@ -38,9 +37,7 @@ from pylint.constants import PYLINT_HOME, USER_HOME
 from pylint.utils import LinterStats
 
 
-def load_results(
-    base: str | Path, pylint_home: str | Path = PYLINT_HOME
-) -> LinterStats | None:
+def load_results(base: str) -> LinterStats | None:
     # TODO: 3.0: Remove # pylint: disable=fixme
     # pylint: disable=import-outside-toplevel
     from pylint.lint.caching import load_results as _real_load_results
@@ -50,12 +47,10 @@ def load_results(
         "'pylint.lint.load_results' instead. This will be removed in 3.0.",
         DeprecationWarning,
     )
-    return _real_load_results(base, pylint_home)
+    return _real_load_results(base, PYLINT_HOME)
 
 
-def save_results(
-    results: LinterStats, base: str | Path, pylint_home: str | Path = PYLINT_HOME
-) -> None:
+def save_results(results: LinterStats, base: str) -> None:
     # TODO: 3.0: Remove # pylint: disable=fixme
     # pylint: disable=import-outside-toplevel
     from pylint.lint.caching import save_results as _real_save_results
@@ -65,4 +60,4 @@ def save_results(
         "'pylint.lint.save_results' instead. This will be removed in 3.0.",
         DeprecationWarning,
     )
-    return _real_save_results(results, base, pylint_home)
+    return _real_save_results(results, base, PYLINT_HOME)
